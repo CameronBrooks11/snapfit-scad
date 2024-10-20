@@ -100,4 +100,4 @@ difference() {
 
 ## License
 
-Adapted by Cameron K. Brooks from [Thingiverse](https://www.thingiverse.com/thing:1799553/files) on 2024-01-26 and 2024-10-20.
+Adapted by Cameron K. Brooks from [Thingiverse](https://www.thingiverse.com/thing:1799553/files) on 2024-01-26 and prepared for public re-release on 2024-10-20.
