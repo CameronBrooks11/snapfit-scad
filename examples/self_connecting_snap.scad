@@ -1,4 +1,4 @@
-use <../src/snapfit.scad>;
+use <../snapfit.scad>;
 
 // Parameters
 w = 10; // Base cylinder diameter
@@ -19,7 +19,7 @@ thickness = 1;
 
 $fn = 64; // Number of facets for the cylinder
 
-z_fite = $preview ? 0.05 : 0.0; // Z offset for preview
+z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
 
 difference()
 {
