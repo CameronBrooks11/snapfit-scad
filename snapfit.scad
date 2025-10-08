@@ -3,8 +3,7 @@
 
 def_dia = 3; // Snap fit dia
 def_lip = 0.75; // Snap fit def_lip (adds to dia)
-def_col_h = def_dia * 2;
-// def_col_h = 5;    // Snap fit Mini column height
+def_col_h = def_dia * 2; // Snap fit Mini column height
 
 def_slot_ratio = 0.7; // Slot ratio
 
@@ -19,7 +18,8 @@ module snapfit(
   col_h = def_col_h,
   col_tol = def_col_tol,
   slot_ratio = def_slot_ratio,
-  thickness = undef
+  thickness = undef,
+  under_chamfer_angle = undef
 ) {
   z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
   // Calculated Snapfit Parameters
@@ -30,9 +30,20 @@ module snapfit(
 
   difference() {
     union() {
-      translate([0, 0, col_h + head_h / 2])
-        cylinder(r1=head_r1, r2=head_r2, h=head_h, center=true);
       // snapfit head
+      translate([0, 0, col_h + head_h / 2]) {
+
+        if (!is_undef(under_chamfer_angle)) {
+          under_height = head_h / 3;
+          r2_from_under_angle = calculateRadFromAngle(-under_chamfer_angle, head_r1, under_height);
+
+          cylinder(r1=head_r1, r2=head_r2, h=head_h, center=true); // Main head
+          translate([0, 0, -head_h / 2 - under_height / 2]) // Under chamfer
+            rotate([0, 180, 0]) cylinder(r1=head_r1, r2=r2_from_under_angle, h=under_height, center=true);
+        } else {
+          cylinder(r1=head_r1, r2=head_r2, h=head_h, center=true); // Main head
+        }
+      }
 
       translate([0, 0, col_h / 2]) cylinder(r=col_r - col_tol, h=col_h, center=true); // Mini column
 
@@ -41,15 +52,14 @@ module snapfit(
         translate([0, 0, col_h - head_h - thickness + (head_h) / 2]) cylinder(
             r1=col_r - col_tol, r2=col_r - col_tol + lip, h=head_h, center=true
           );
-        // snapfit foot
       }
     }
 
     thick = is_undef(thickness) ? 0 : thickness; // Snapfit foot thickness
+
     translate([0, 0, (col_h + head_h + z_fight) - (slot_ratio * (col_h + head_h)) / 2]) cube(
         [head_r1 / 3, head_r1 * 2 + thick * 2, slot_ratio * (col_h + head_h)], center=true
       );
-    // Cut in snap fit
   }
 }
 
@@ -74,20 +84,21 @@ module snapfit_neg(
   z_offs = rot ? 0 : (head_h + neg_tol + z1);
 
   rotate([rot, 0, 0]) translate([0, 0, -(head_h + neg_tol) + z_offs]) union() {
+
+        // snapfit head
         translate([0, 0, (head_h + neg_tol) / 2]) cylinder(
             r1=head_r1 + neg_tol, r2=head_r2 + neg_tol,
             h=head_h + neg_tol, center=true
           );
-        // snapfit head
+
+        // optional snapfit foot
         if (!is_undef(thickness)) {
-          // optional snapfit foot
           translate([0, 0, -thickness / 2])
             cylinder(r=head_r1 - neg_tol / 2, h=thickness, center=true);
-          // Mini column
         } else {
+          // Mini column
           translate([0, 0, -col_h / 2])
             cylinder(r=head_r1 - neg_tol / 2, h=col_h, center=true);
-          // Mini column
         }
       }
 }
