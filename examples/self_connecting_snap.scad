@@ -17,7 +17,7 @@ neg_tol = 0.5; // Snap fit tolerance for the negative
 // gap of 'thickness' from the bottom of the column head
 thickness = 1;
 
-$fn = 64; // Number of facets for the cylinder
+$fn = $preview ? 32 : 128; // Number of facets for the cylinder
 
 z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
 
