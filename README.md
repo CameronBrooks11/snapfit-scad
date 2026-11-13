@@ -1,12 +1,13 @@
 # snapfit-scad
 
-An OpenSCAD library for round, slotted snap-fit pins: `snapfit()` makes the pin
-and `snapfit_neg()` the hole it snaps into, for cutting from another part.
-Adapted from jpearce's
-[Parametric OpenSCAD Snap Fit](https://www.thingiverse.com/thing:1799553).
+An OpenSCAD library for round, slotted snap-fit pins that print without
+supports: `snapfit()` makes the pin and `snapfit_neg()` the hole it snaps into,
+to cut from the mating part. Add a foot to trap a plate between foot and head,
+or an under chamfer for pins printed in flexible filament.
 
-![The self-connecting example from above](assets/scs_example_topdiag.png)
-![The self-connecting example from below](assets/scs_example_bottdiag.png)
+| Self-connecting disc | TPU foot with an under chamfer | Two discs snapped together, cut away |
+| --- | --- | --- |
+| ![Self-connecting disc](assets/self_connecting_snap.png) | ![TPU foot](assets/pcb_feet_tpu.png) | ![Stacked pair](assets/stacked_pair.png) |
 
 ## Install
 
@@ -71,9 +72,9 @@ tall, with a base radius of `(dia + lip) / 2`.
 Positional arguments follow the order in the tables, as in the examples:
 `snapfit(dia, lip, col_h, col_tol, slot_ratio, thickness = thickness)`.
 
-Earlier versions of this README listed `diameter`, `column_height`,
-`column_tolerance` and `negative_tolerance`. The modules never had those
-names, and OpenSCAD ignores them with a warning.
+Use these names. Older copies of this README listed `diameter`,
+`column_height`, `column_tolerance` and `negative_tolerance`, which OpenSCAD
+ignores with a warning.
 
 ## Examples
 
@@ -82,6 +83,9 @@ names, and OpenSCAD ignores them with a warning.
   one below, 10 mm higher.
 - `examples/pcb_feet_tpu.scad`: a tapered foot with a short pin and an under
   chamfer, to push into a board's mounting hole.
+- `examples/stacked_pair.scad`: two self-connecting discs seated together and
+  cut in half, to show how the pin sits in the hole. For looking at, not
+  printing.
 
 They were printed on a Prusa MK3S with a 0.4 mm nozzle. From the PrusaSlicer
 projects, removed from the repo but in its history:
@@ -98,20 +102,16 @@ projects, removed from the repo but in its history:
 ## Checks
 
 `just test` takes about 1 s on OpenSCAD 2026.10.15. It checks each module's
-size, with and without `thickness` and `under_chamfer_angle`, and both
+size, with and without `thickness` and `under_chamfer_angle`, and the
 examples. Then it stacks two self-connecting copies (`tests/fit.scad`). Seated,
 they only touch. 0.1 mm closer, they overlap. Lifted 1 mm, the head overlaps
 the hole by 0.43 mm, which is the snap. It also checks that `flip` mirrors the
-hole.
+hole. The checks are geometry: how well a pin snaps and holds depends on the
+material and the print. `just images` renders the pictures above.
 
-## Not verified
+## Origin and licence
 
-The checks are geometry only. Whether a pin snaps in, holds, or can be pulled
-back out depends on the material and the print, and I haven't tested those.
-
-## Credits and licence
-
-Adapted from jpearce's
+The library grew from jpearce's
 [Parametric OpenSCAD Snap Fit](https://www.thingiverse.com/thing:1799553),
-published on Thingiverse in 2016 under GPL-3.0. This library is GPL-3.0 too;
-see [LICENSE](LICENSE).
+published on Thingiverse in 2016 under GPL-3.0, and is GPL-3.0 too; see
+[LICENSE](LICENSE).
