@@ -93,6 +93,9 @@ EXAMPLES = [
     ("self_connecting_snap.scad", 1, 10, 10, 12.875),
     # base 3 + column 2 + head 3
     ("pcb_feet_tpu.scad", 1, 10, 10, 8),
+    # two self-connecting discs seated 10 mm apart, halved: they touch at the
+    # foot, so one piece, 12.875 + 10 tall
+    ("stacked_pair.scad", 1, 10, 5, 22.875),
 ]
 
 
