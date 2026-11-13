@@ -1,5 +1,6 @@
-// Adapted by Cameron K. Brooks on 2024-01-26 from the following source:
-// https://www.thingiverse.com/thing:1799553/files
+// Adapted by Cameron K. Brooks on 2024-01-26 from jpearce's
+// Parametric OpenSCAD Snap Fit, https://www.thingiverse.com/thing:1799553,
+// licensed GPL-3.0. This adaptation is GPL-3.0 too; see LICENSE.
 
 def_dia = 3;      // Snap fit dia
 def_lip = 0.75;   // Snap fit def_lip (adds to dia)
