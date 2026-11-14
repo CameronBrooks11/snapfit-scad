@@ -1,127 +1,87 @@
-// Adapted by Cameron K. Brooks on 2024-01-26 from jpearce's
-// Parametric OpenSCAD Snap Fit, https://www.thingiverse.com/thing:1799553,
-// licensed GPL-3.0. This adaptation is GPL-3.0 too; see LICENSE.
+// snapfit.scad: round, slotted snap-fit pins that print without supports.
+//
+// snapfit() is the pin: a column with a cone-shaped head, slotted so the head's two
+// halves flex together on the way through. snapfit_neg() is the hole it snaps into,
+// to subtract from the mating part: a narrow throat the head squeezes past, and a
+// pocket above where the head opens out again. MIT licence; see LICENSE.
+//
+// Both build the head from dia and lip: it is (dia + lip) / 2 tall, on a base
+// dia + lip across, and narrows to dia / 2 across at the top.
 
-def_dia = 3;      // Snap fit dia
-def_lip = 0.75;   // Snap fit def_lip (adds to dia)
-def_col_h = def_dia * 2; // Snap fit Mini column height
+$fn = 64;
 
-def_slot_ratio = 0.7; // Slot ratio
+function _head_r(dia, lip) = (dia + lip) / 2;
+function _head_h(dia, lip) = (dia + lip) / 2;
+// The narrow throat of the hole: the column's own size, so a seated column clears
+// it and the head's wider base cannot pass back out.
+function _throat_r(dia) = dia / 2;
 
-def_col_tol = 0.1; // Column Tolerance
-def_neg_tol = 0.5; // Tolerance for the Negative Snapfit
-
-$fn = $preview ? 32 : 128; // Number of facets for the cylinder
-z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
-
-module snapfit(
-  dia = def_dia,
-  lip = def_lip,
-  col_h = def_col_h,
-  col_tol = def_col_tol,
-  slot_ratio = def_slot_ratio,
-  thickness = undef,
-  under_chamfer_angle = undef
-) {
-  z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
-
-  // Calculated Snapfit Parameters
-  head_h  = (dia + lip) / 2;                      // Snap fit height
-  head_r1 = (dia + lip) / 2;                      // Snap fit radius 1
-  head_r2 = calculateRadFromAngle(180 - 60, head_r1, head_h); // Snap fit radius 2
-  col_r   = dia / 2;                              // Mini column radius
-
+/**
+ * The pin, standing on z = 0.
+ *   dia                 column diameter, before col_tol
+ *   lip                 how much wider the head's base is than dia
+ *   col_h               column height, from z = 0 to the head
+ *   col_tol             taken off the column's radius
+ *   slot_ratio          the slot's depth, as a fraction of column plus head height
+ *   thickness           if set, a foot this far below the head, to trap a plate of
+ *                       this thickness between foot and head
+ *   under_chamfer_angle if set, a cone of this angle under the head, so the catch
+ *                       is a slope instead of a step (for flexible filament)
+ */
+module snapfit(dia = 3, lip = 0.75, col_h = 6, col_tol = 0.1, slot_ratio = 0.7,
+               thickness = undef, under_chamfer_angle = undef) {
+  col_r = dia / 2 - col_tol;
+  head_r = _head_r(dia, lip);
+  head_h = _head_h(dia, lip);
+  total = col_h + head_h;
+  slot_w = dia / 3;
+  slot_d = slot_ratio * total;
   difference() {
     union() {
-      // snapfit head
-      translate([0, 0, col_h + head_h / 2]) {
-        if (!is_undef(under_chamfer_angle)) {
-          under_height          = head_h / 3;
-          r2_from_under_angle   = calculateRadFromAngle(-under_chamfer_angle, head_r1, under_height);
-
-          // Main head
-          cylinder(r1=head_r1, r2=head_r2, h=head_h, center=true);
-
-          // Under chamfer
-          translate([0, 0, -head_h/2 - under_height/2])
-            rotate([0, 180, 0])
-              cylinder(r1=head_r1, r2=r2_from_under_angle, h=under_height, center=true);
-        } else {
-          // Main head
-          cylinder(r1=head_r1, r2=head_r2, h=head_h, center=true);
-        }
+      cylinder(r = col_r, h = col_h + 0.01);
+      translate([0, 0, col_h]) cylinder(r1 = head_r, r2 = dia / 4, h = head_h);
+      if (!is_undef(under_chamfer_angle)) {
+        // From the head's rim down to the column, at the given angle from horizontal.
+        drop = (head_r - col_r) * tan(under_chamfer_angle);
+        translate([0, 0, col_h - drop]) cylinder(r1 = col_r, r2 = head_r, h = drop);
       }
-
-      // Mini column
-      translate([0, 0, col_h / 2]) cylinder(r=col_r - col_tol, h=col_h, center=true);
-
-      // optional snapfit foot
       if (!is_undef(thickness)) {
-        translate([0, 0, col_h - head_h - thickness + head_h/2])
-          cylinder(r1=col_r - col_tol, r2=col_r - col_tol + lip, h=head_h, center=true);
+        // The foot: a 45 degree cone whose flat top is `thickness` below the head,
+        // flaring out to `lip` past the head's rim so the plate has a shoulder to sit on.
+        foot_r = head_r + lip / 2;
+        translate([0, 0, col_h - thickness - (foot_r - col_r)])
+          cylinder(r1 = col_r, r2 = foot_r, h = foot_r - col_r);
       }
     }
-
-    thick = is_undef(thickness) ? 0 : thickness; // Snapfit foot thickness
-
-    translate([0, 0, (col_h + head_h + z_fight) - (slot_ratio * (col_h + head_h)) / 2])
-      cube([head_r1 / 3, head_r1 * 2 + thick * 2, slot_ratio * (col_h + head_h)], center=true);
+    translate([-slot_w / 2, -head_r - 1, total - slot_d]) cube([slot_w, 2 * head_r + 2, slot_d + 1]);
   }
 }
 
-module snapfit_neg(
-  dia = def_dia,
-  lip = def_lip,
-  col_h = def_col_h,
-  neg_tol = def_neg_tol,
-  slot_ratio = def_slot_ratio,
-  thickness = undef,
-  flip = false,
-  under_chamfer_angle = undef
-) {
-  // Calculated Snapfit Parameters
-  head_h  = (dia + lip) / 2;                      // Snap fit height
-  head_r1 = (dia + lip) / 2;                      // Snap fit radius 1
-  head_r2 = calculateRadFromAngle(180 - 60, head_r1, head_h); // Snap fit radius 2
-  col_r   = dia / 2;                              // Mini column radius
-
-  rot   = flip ? 180 : 0;
-  z1    = is_undef(thickness) ? col_h : thickness;
-  z_offs = rot ? 0 : (head_h + neg_tol + z1);
-
-  // Place so the main head spans z∈[0, head_h+neg_tol] in the local frame
-  rotate([rot, 0, 0])
-    translate([0, 0, -(head_h + neg_tol) + z_offs])
-      union() {
-        // snapfit head clearance
-        translate([0, 0, (head_h + neg_tol)/2])
-          cylinder(r1=head_r1 + neg_tol, r2=head_r2 + neg_tol, h=head_h + neg_tol, center=true);
-
-        // under-chamfer clearance (optional)
-        if (!is_undef(under_chamfer_angle)) {
-          under_height_neg = head_h/3 + neg_tol; // add z clearance
-          // At z=0 interface, radius must match top of under chamfer = head_r1
-          r_under_bottom = calculateRadFromAngle(-under_chamfer_angle, head_r1 + neg_tol, under_height_neg);
-          // Make the frustum extend downwards from z=0 to z=-under_height_neg
-          translate([0, 0, -under_height_neg/2])
-            cylinder(r1=r_under_bottom, r2=head_r1 + neg_tol, h=under_height_neg, center=true);
-        }
-
-        // optional snapfit foot / column clearance below
-        if (!is_undef(thickness)) {
-          translate([0, 0, -thickness/2 + z_fight])
-            cylinder(r=head_r1 - neg_tol/2, h=thickness, center=true);
-        } else {
-          // Mini column
-          translate([0, 0, -col_h/2])
-            cylinder(r=head_r1 - neg_tol/2, h=col_h, center=true);
-        }
-      }
+/**
+ * The hole for a pin, to subtract from the mating part, starting at z = 0.
+ *   dia, lip, col_h, slot_ratio  match the pin
+ *   neg_tol             clearance around the head in the pocket
+ *   thickness           if set, the throat is this deep (the plate the head snaps
+ *                       past); otherwise col_h
+ *   flip                mirror it top to bottom, for a pin entering from above
+ *   under_chamfer_angle clearance for a pin with an under chamfer
+ */
+module snapfit_neg(dia = 3, lip = 0.75, col_h = 6, neg_tol = 0.5, slot_ratio = 0.7,
+                   thickness = undef, flip = false, under_chamfer_angle = undef) {
+  throat = is_undef(thickness) ? col_h : thickness;
+  head_r = _head_r(dia, lip);
+  pocket_r = head_r + neg_tol;
+  pocket_h = _head_h(dia, lip) + neg_tol;
+  total = throat + pocket_h;
+  module shape() {
+    cylinder(r = _throat_r(dia), h = throat + 0.01);
+    translate([0, 0, throat]) cylinder(r = pocket_r, h = pocket_h);
+    if (!is_undef(under_chamfer_angle)) {
+      // Room for the pin's under chamfer: a cone down from the pocket's floor.
+      drop = (pocket_r - _throat_r(dia)) * tan(under_chamfer_angle);
+      translate([0, 0, throat - drop]) cylinder(r1 = _throat_r(dia), r2 = pocket_r, h = drop + 0.01);
+    }
+  }
+  if (flip) translate([0, 0, total]) mirror([0, 0, 1]) shape();
+  else shape();
 }
-
-// Function to calculate radius based on angle, initial radius, and height
-function calculateRadFromAngle(angle, r, height) =
-  let (norm_angle = angle % 90)
-    (angle < 90)
-      ? r + tan(abs(90 - norm_angle)) * height
-      : r - tan(norm_angle) * height;

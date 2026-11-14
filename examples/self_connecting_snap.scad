@@ -1,31 +1,31 @@
+// A disc with a pin on top and a hole underneath, so copies stack.
+// Seated, each copy rests on the foot of the one below, 10 mm higher.
 use <../snapfit.scad>;
 
-// Parameters
-w = 10; // Base cylinder diameter
-h = 5; // Base cylinder height
+/* [Disc] */
+// Disc diameter (mm)
+w = 10; // [6:1:30]
+// Disc height (mm)
+h = 5; // [2:0.5:15]
 
-dia = 3; // Snap fit diameter
-lip = 0.75; // Snap fit lip (adds to diameter)
-col_h = dia * 2; // Snap fit column height
+/* [Pin] */
+// Pin column diameter (mm)
+dia = 3; // [2:0.25:8]
+// How much wider the head is than the column (mm)
+lip = 0.75; // [0.25:0.05:2]
+// Clearance around the head in the hole (mm)
+neg_tol = 0.5; // [0.1:0.05:1]
+// Gap between the foot and the head: the plate the head snaps past (mm)
+thickness = 1; // [0.5:0.1:3]
 
-slot_ratio = 0.7; // Snap fit slot ratio
-
-col_tol = 0.1; // Snap fit column tolerance
-neg_tol = 0.5; // Snap fit tolerance for the negative
-
-// If defined, creates a foot for the snapfit, leaving a
-// gap of 'thickness' from the bottom of the column head
-thickness = 1;
-
-$fn = $preview ? 32 : 128; // Number of facets for the cylinder
-
-z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
+/* [Hidden] */
+col_h = dia * 2;
+$fn = 64;
 
 difference() {
   union() {
-    cylinder(r=w / 2, h=h, center=true); // Main cylinder
-    translate([0, 0, h / 2]) snapfit(dia, lip, col_h, col_tol, slot_ratio, thickness=thickness);
+    cylinder(d = w, h = h, center = true);
+    translate([0, 0, h / 2]) snapfit(dia, lip, col_h, 0.1, 0.7, thickness = thickness);
   }
-
-  translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, slot_ratio, thickness=thickness);
+  translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, 0.7, thickness = thickness);
 }

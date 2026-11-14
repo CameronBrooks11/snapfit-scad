@@ -1,22 +1,26 @@
+// A tapered foot with a short pin, to push into a board's mounting hole.
+// The pin has an under chamfer, so a foot printed in flexible filament slopes in and
+// out of the hole rather than catching on a step.
 use <../snapfit.scad>;
 
-// Parameters
-w = 10; // Base cylinder diameter
-h = 3; // Base cylinder height
+/* [Foot] */
+// Foot diameter at the floor (mm)
+foot_d = 10; // [6:1:20]
+// Foot height (mm)
+foot_h = 3; // [1:0.5:10]
 
-dia = 5; // Snap fit diameter
-lip = 1; // Snap fit lip (adds to diameter)
-col_h = 2; // Snap fit column height
+/* [Pin] */
+// Pin column diameter: the board hole's size (mm)
+dia = 4.5; // [2:0.25:6]
+// How much wider the head is than the column (mm)
+lip = 1.5; // [0.5:0.1:3]
+// Column height: the board's thickness (mm)
+col_h = 2; // [0.8:0.1:5]
+// Angle of the cone under the head (degrees)
+chamfer = 45; // [20:5:70]
 
-slot_ratio = 0.8; // Snap fit slot ratio
+/* [Hidden] */
+$fn = 64;
 
-col_tol = 0.1; // Snap fit column tolerance
-
-$fn = $preview ? 32 : 128; // Number of facets for the cylinder
-
-z_fight = $preview ? 0.05 : 0.0; // Z offset for preview
-
-union() {
-  translate([0, 0, h / 2]) cylinder(r1=w / 2, r2=w / 3, h=h, center=true); // Main cylinder
-  translate([0, 0, h]) snapfit(dia, lip, col_h, col_tol, slot_ratio, under_chamfer_angle=45);
-}
+cylinder(d1 = foot_d, d2 = foot_d * 0.7, h = foot_h);
+translate([0, 0, foot_h]) snapfit(dia, lip, col_h, 0.1, 0.7, under_chamfer_angle = chamfer);

@@ -64,27 +64,29 @@ def call(openscad, tmp, body):
     return render(openscad, scad, os.path.join(tmp, "call.stl"))
 
 
-# (label, OpenSCAD source, solids, x, y, z). At $fn = 64 a circle's y extent
-# is a little under its diameter.
+# (label, OpenSCAD source, solids, x, y, z). The head's y extent is the chord
+# the 1 mm slot leaves: 2 * sqrt(1.875^2 - 0.5^2) = 3.61.
 SHAPES = [
-    ("snapfit()", "snapfit();", 1, 3.75, 3.69, 7.875),
-    ("snapfit(thickness=1)", "snapfit(thickness=1);", 1, 4.30, 4.25, 7.875),
-    ("snapfit(under_chamfer_angle=45)", "snapfit(under_chamfer_angle=45);", 1, 3.75, 3.69, 7.875),
+    ("snapfit()", "snapfit();", 1, 3.75, 3.61, 7.875),
+    # The foot flares lip / 2 past the head: 2 * (1.875 + 0.375) = 4.5.
+    ("snapfit(thickness=1)", "snapfit(thickness=1);", 1, 4.50, 4.38, 7.875),
+    ("snapfit(under_chamfer_angle=45)", "snapfit(under_chamfer_angle=45);", 1, 3.75, 3.61, 7.875),
     ("snapfit_neg()", "snapfit_neg();", 1, 4.75, 4.75, 8.375),
     ("snapfit_neg(thickness=1)", "snapfit_neg(thickness=1);", 1, 4.75, 4.75, 3.375),
     ("snapfit_neg(under_chamfer_angle=45)", "snapfit_neg(under_chamfer_angle=45);", 1, 4.75, 4.75, 8.375),
     # What the under chamfer adds: below the head, the 45 degree cone is wider
-    # than the column for 0.47 mm (split in two by the slot) ...
+    # than the column for 1.875 - 1.4 = 0.475 mm (split in two by the slot) ...
     (
         "under chamfer, positive",
         "difference() { snapfit(under_chamfer_angle=45); snapfit(); }",
-        2, 3.75, 3.69, 0.475,
+        2, 3.75, 3.61, 0.475,
     ),
-    # ... and its clearance is wider than the hole for 0.75 mm.
+    # ... and its clearance runs from the pocket's edge down to the throat,
+    # 2.375 - 1.5 = 0.875 mm.
     (
         "under chamfer, negative",
         "difference() { snapfit_neg(under_chamfer_angle=45); snapfit_neg(); }",
-        1, 4.75, 4.75, 0.75,
+        1, 4.73, 4.73, 0.875,
     ),
 ]
 
@@ -134,13 +136,15 @@ def main():
         # 0.1 mm closer, the foot runs into the upper copy, so the check can
         # see an overlap.
         closer = render(openscad, FIT, out, ["OFFSET=9.9"])
-        check("0.1 mm closer than seated", closer, (2, 4.30, 4.25, 0.10))
+        check("0.1 mm closer than seated", closer, (2, 4.50, 4.38, 0.10))
 
-        # Lifted 1 mm, the head sits in the upper copy's hole and is wider
+        # Lifted 1 mm, the head sits in the upper copy's throat and is wider
         # than it: the two halves of the slotted head overlap the plate. That
-        # interference is the snap.
+        # interference is the snap. The head narrows 0.6 mm per mm of height
+        # (1.875 to 0.75 over 1.875), so it is wider than the 1.5 mm throat
+        # for its first 0.625 mm.
         lifted = render(openscad, FIT, out, ["OFFSET=11"])
-        check("lifted 1 mm (the snap's lip)", lifted, (2, 3.75, 3.70, 0.43))
+        check("lifted 1 mm (the snap's lip)", lifted, (2, 3.75, 3.61, 0.625))
 
         # flip = true is the negative mirrored top to bottom.
         for t, height in (("undef", 8.375), ("1", 3.375)):
