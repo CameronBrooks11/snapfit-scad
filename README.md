@@ -32,8 +32,9 @@ head's base is `lip` wider than the column, and a slot down through the head
 lets its two halves flex together as it goes through the hole.
 
 `snapfit_neg()` is the matching hole, to subtract from the part the pin goes
-into. It's narrower than the head, so the head has to squeeze through, then a
-pocket above gives the head `neg_tol` of clearance once it's through.
+into. Its throat is `dia` across, the column's own size, so the head has to
+squeeze through, then a pocket above gives the head `neg_tol` of clearance once
+it's through.
 
 `thickness` changes both:
 
@@ -45,7 +46,8 @@ pocket above gives the head `neg_tol` of clearance once it's through.
 ## Parameters
 
 Both modules compute the head from `dia` and `lip`: it's `(dia + lip) / 2`
-tall, with a base radius of `(dia + lip) / 2`.
+tall, with a base radius of `(dia + lip) / 2`, and narrows to `dia / 2` across
+at the top.
 
 ### snapfit
 
@@ -64,7 +66,7 @@ tall, with a base radius of `(dia + lip) / 2`.
 | Parameter | Default | Description |
 | --- | --- | --- |
 | `dia`, `lip`, `col_h`, `slot_ratio` | as above | Match the pin. |
-| `neg_tol` | `0.5` | Clearance around the head, and half of it taken off the hole. |
+| `neg_tol` | `0.5` | Clearance around the head in the pocket. |
 | `thickness` | `undef` | If set, the hole is this deep; otherwise `col_h`. |
 | `flip` | `false` | Mirrors the hole top to bottom, for a pin entering from above. |
 | `under_chamfer_angle` | `undef` | Clearance for a pin with an under chamfer. |
@@ -87,8 +89,10 @@ ignores with a warning.
   cut in half, to show how the pin sits in the hole. For looking at, not
   printing.
 
-They were printed on a Prusa MK3S with a 0.4 mm nozzle. From the PrusaSlicer
-projects, removed from the repo but in its history:
+The earlier versions of the first two were printed on a Prusa MK3S with a
+0.4 mm nozzle, with these settings from their PrusaSlicer projects (removed
+from the repo but in its history). The rewritten geometry hasn't been printed
+yet.
 
 | | self_connecting_snap | pcb_feet_tpu |
 | --- | --- | --- |
@@ -105,13 +109,15 @@ projects, removed from the repo but in its history:
 size, with and without `thickness` and `under_chamfer_angle`, and the
 examples. Then it stacks two self-connecting copies (`tests/fit.scad`). Seated,
 they only touch. 0.1 mm closer, they overlap. Lifted 1 mm, the head overlaps
-the hole by 0.43 mm, which is the snap. It also checks that `flip` mirrors the
+the throat for 0.625 mm, which is the snap. It also checks that `flip` mirrors the
 hole. The checks are geometry: how well a pin snaps and holds depends on the
 material and the print. `just images` renders the pictures above.
 
 ## Origin and licence
 
-The library grew from jpearce's
-[Parametric OpenSCAD Snap Fit](https://www.thingiverse.com/thing:1799553),
-published on Thingiverse in 2016 under GPL-3.0, and is GPL-3.0 too; see
-[LICENSE](LICENSE).
+The library is a rewrite, under MIT, of an idea from jpearce's
+[Parametric OpenSCAD Snap Fit](https://www.thingiverse.com/thing:1799553) on
+Thingiverse: a slotted round pin and the hole it snaps into. The code is new;
+the modules and their parameters keep their names and order, so existing calls
+still work, though the pin's and hole's exact shapes have changed. The earlier
+GPL-3.0 versions are in this repository's history. MIT; see [LICENSE](LICENSE).
