@@ -8,8 +8,6 @@
 // Both build the head from dia and lip: it is (dia + lip) / 2 tall, on a base
 // dia + lip across, and narrows to dia / 2 across at the top.
 
-$fn = 64;
-
 function _head_r(dia, lip) = (dia + lip) / 2;
 function _head_h(dia, lip) = (dia + lip) / 2;
 // The narrow throat of the hole: the column's own size, so a seated column clears
