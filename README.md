@@ -111,7 +111,10 @@ examples. Then it stacks two self-connecting copies (`tests/fit.scad`). Seated,
 they only touch. 0.1 mm closer, they overlap. Lifted 1 mm, the head overlaps
 the throat for 0.625 mm, which is the snap. It also checks that `flip` mirrors the
 hole. The checks are geometry: how well a pin snaps and holds depends on the
-material and the print. `just images` renders the pictures above.
+material and the print. A render with an error or warning fails. `just check`
+checks the `.scad` files are formatted with
+[topiary](https://github.com/tweag/topiary) 0.8.0; `just fmt` formats them.
+`just images` renders the pictures above.
 
 ## Origin and licence
 
