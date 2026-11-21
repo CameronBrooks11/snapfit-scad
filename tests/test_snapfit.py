@@ -49,11 +49,14 @@ def render(openscad, scad, out, defines=()):
     for d in defines:
         cmd += ["-D", d]
     result = subprocess.run(cmd + [scad], capture_output=True, text=True)
+    # A failed assert leaves the exit status at 0, so stderr is read first.
+    errors = [l for l in result.stderr.splitlines() if l.startswith(("ERROR", "WARNING"))]
+    if errors:
+        raise RuntimeError(f"{os.path.basename(scad)}: openscad exited {result.returncode}: {'; '.join(errors)}")
     if "empty" in result.stderr.lower():
         return None
     if result.returncode != 0:
-        errors = [l for l in result.stderr.splitlines() if "WARNING" in l or "ERROR" in l]
-        raise RuntimeError(f"{os.path.basename(scad)}: openscad exited {result.returncode}: {'; '.join(errors)}")
+        raise RuntimeError(f"{os.path.basename(scad)}: openscad exited {result.returncode}")
     return measure(out)
 
 
