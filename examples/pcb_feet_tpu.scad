@@ -22,5 +22,5 @@ chamfer = 45; // [20:5:70]
 /* [Hidden] */
 $fn = 64;
 
-cylinder(d1 = foot_d, d2 = foot_d * 0.7, h = foot_h);
-translate([0, 0, foot_h]) snapfit(dia, lip, col_h, 0.1, 0.7, under_chamfer_angle = chamfer);
+cylinder(d1=foot_d, d2=foot_d * 0.7, h=foot_h);
+translate([0, 0, foot_h]) snapfit(dia, lip, col_h, 0.1, 0.7, under_chamfer_angle=chamfer);

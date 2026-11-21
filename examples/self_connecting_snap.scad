@@ -23,9 +23,9 @@ col_h = dia * 2;
 $fn = 64;
 
 difference() {
-  union() {
-    cylinder(d = w, h = h, center = true);
-    translate([0, 0, h / 2]) snapfit(dia, lip, col_h, 0.1, 0.7, thickness = thickness);
-  }
-  translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, 0.7, thickness = thickness);
+    union() {
+        cylinder(d=w, h=h, center=true);
+        translate([0, 0, h / 2]) snapfit(dia, lip, col_h, 0.1, 0.7, thickness=thickness);
+    }
+    translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, 0.7, thickness=thickness);
 }

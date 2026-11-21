@@ -17,16 +17,16 @@ thickness = 1;
 $fn = 64;
 
 module copy() {
-  difference() {
-    union() {
-      cylinder(r=w / 2, h=h, center=true);
-      translate([0, 0, h / 2]) snapfit(dia, lip, col_h, col_tol, slot_ratio, thickness=thickness);
+    difference() {
+        union() {
+            cylinder(r=w / 2, h=h, center=true);
+            translate([0, 0, h / 2]) snapfit(dia, lip, col_h, col_tol, slot_ratio, thickness=thickness);
+        }
+        translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, slot_ratio, thickness=thickness);
     }
-    translate([0, 0, -h / 2 - 0.1]) snapfit_neg(dia, lip, col_h, neg_tol, slot_ratio, thickness=thickness);
-  }
 }
 
 intersection() {
-  copy();
-  translate([0, 0, OFFSET]) copy();
+    copy();
+    translate([0, 0, OFFSET]) copy();
 }
